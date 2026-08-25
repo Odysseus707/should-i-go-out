@@ -27,19 +27,19 @@ the Open-Meteo API on every load — nothing on the page is mocked or hard-coded
 
 ## 2. Writeup — the two needs I defined
 
-> **Note to self before submitting:** rewrite this in your own words — it should be true of
-> how you actually use a weather app.
-
-Beyond temperature and rain, I added two needs of my own. The first is **knowing the single
-best hour to be outside**: I'm indoors for most of the day and realistically get one window
-to go for a walk or a run, so what I need isn't the whole forecast — it's a recommendation.
-The page scores every daylight hour on feels-like temperature, UV index, and chance of rain
-and just tells me when to go, which saves me from reading an hourly table and guessing.
-The second is **dressing for a whole day out**: I leave in the morning and often don't get
-home until late, and what it feels like when I walk out the door is a bad predictor of what
-it'll feel like on the way back. So instead of showing today's high and low, the page asks
-when I'm heading home and tells me the coldest it will feel *between now and then* — which
-is the number that actually decides whether I carry a jacket.
+So besides the two prerequisite features that were in the project description already, I came
+up with two specific other functionalities that I would find interesting to have in such a
+weather app. one of them being the feature of telling me the kinda clothing I need to wear.
+Usually, the thing is that I find it difficult for me to actually understand the Fahrenheit
+system too much since I have been living in a Celcius system throughout my life. I wanted to
+get a better idea of how cold certain temperatures are in Fahrenheit so I could get used to
+the weather forecasts I see in the news. So this tells me if I need To wear a shirt outside or
+maybe a light jacket or a heavy jacket or stay completely padded up or even wear rainy day
+clothes. In a similar vein, I would say the other feature that I wanted to implement was the
+when should I go out feature. This essentially tells me the best time during the day to
+actually go out for a walk because I'm a big fan of walks, and sometimes I feel like I go
+outside and the temperature is a bit too cold or it's a bit too dreary. So these feature both
+tie into the act of me deciding when to go for a walk.
 
 ---
 
