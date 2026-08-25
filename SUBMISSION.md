@@ -45,7 +45,7 @@ tie into the act of me deciding when to go for a walk.
 
 ## 3. Video walkthrough
 
-**[ ▸ PASTE VIDEO LINK OR ATTACH FILE HERE ]**
+**[ PASTE VIDEO LINK OR ATTACH FILE HERE ]**
 
 <!--
   ~15 second screen recording, phone-width browser window.
@@ -64,7 +64,7 @@ tie into the act of me deciding when to go for a walk.
 
 ## 4. Generative AI transcript
 
-**[ ▸ PASTE TRANSCRIPT LINK OR ATTACH `TRANSCRIPT.md` / `TRANSCRIPT.pdf` HERE ]**
+**[ PASTE TRANSCRIPT LINK OR ATTACH `TRANSCRIPT.md` / `TRANSCRIPT.pdf` HERE ]**
 
 This prototype was built in a single Claude Code session. The full transcript covering that
 session accompanies this document, per the course Gen AI policy.
