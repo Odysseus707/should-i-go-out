@@ -1566,3 +1566,112 @@ Now regenerating the transcript and re-rendering both PDFs, then verifying every
 SP=/private/tmp/claude-501/-Users-vivekrai-Desktop-Weather/8a6d1181-e157-4dc3-bdef-847b16cad7a5/scratchpad
 export PATH="$PATH...`
 
+### Claude
+
+*Tools used:*
+
+- `Bash` - `cd /Users/vivekrai/Desktop/Weather
+git add -A
+git -c user.name="Vivek Rai" -c user.email="vivekrai2949@gmail.com" commit -q -m "Finalize submission with live vi...`
+
+### Claude
+
+All seven links resolve. Final visual check of the document you'll send:
+
+### Claude
+
+*Tools used:*
+
+- `Bash` - `SP=/private/tmp/claude-501/-Users-vivekrai-Desktop-Weather/8a6d1181-e157-4dc3-bdef-847b16cad7a5/scratchpad
+rm -f "$SP"/SUBMISSION.pdf.png
+qlmanage -t -s 1000 -o...`
+
+### Claude
+
+*Tools used:*
+
+- `Read` - `/private/tmp/claude-501/-Users-vivekrai-Desktop-Weather/8a6d1181-e157-4dc3-bdef-847b16cad7a5/scratchpad/SUBMISSION.pdf.png`
+
+### Claude
+
+**Finalized. `SUBMISSION.pdf` on your Desktop is ready to send** — 2 pages, all four items filled in, no placeholders left.
+
+Everything is pushed and all seven links in the document return 200.
+
+**One judgment call you should know about:** GitHub's blob view has no video player for repo files — it only shows "View raw / Download". I verified this on your actual file. So a plain GitHub link would have made your grader download 12MB to watch a 32-second clip. Instead the submission leads with a watch page on your existing Pages site, and I confirmed in-browser that it really plays (`readyState: 4`, playback advancing, no errors) — the screenshot showed your app mid-video. The direct GitHub file link is listed underneath as the source.
+
+To make that work I remuxed the `.mov` to `.mp4`. That's a container change only, not a re-encode — your recording was already H.264, so there's no quality loss. Both files are in the repo; your original `.mov` is untouched.
+
+The transcript PDF needed no such workaround — GitHub renders PDFs inline, which I confirmed by loading it. It's now 30 pages covering the whole session, including this one.
+
+I also renamed the recording to `walkthrough.mov`. The macOS default name contained a space and a U+202F narrow no-break space, which would have produced a fragile percent-encoded URL.
+
+Two small things I deliberately left alone, since you said to use your writeup as-is: the typos in it ("Celcius", "if I need To wear", "these feature both"), and the fact that your stated motivation — building Fahrenheit intuition — isn't something the clothing card actually does yet. Both are quick fixes if you want them before sending.
+
+## Turn 9 - Vivek
+
+maybe we just give the unlisted video link instead. roll back all the stuff you did with the walthrough video on github and istead just put this link: https://youtube.com/shorts/wB8YarpGf2o?feature=share
+
+### Claude
+
+Before I swap it in, let me verify the YouTube link actually resolves and isn't set to Private.
+
+### Claude
+
+*Tools used:*
+
+- `Bash` - `U="https://youtube.com/shorts/wB8YarpGf2o?feature=share"
+echo "status: $(curl -sIL -o /dev/null -w '%{http_code}' "$U")"
+echo "final:  $(curl -sIL -o /dev/null ...`
+
+### Claude
+
+Metadata looks right (unlisted, not private, 31s, correct title), but "Video unavailable" also appears in the page source. That's likely boilerplate — let me confirm in a real browser.
+
+### Claude
+
+*Tools used:*
+
+- `mcp__plugin_ecc_chrome-devtools__new_page` - `https://youtube.com/shorts/wB8YarpGf2o?feature=share`
+
+### Claude
+
+*Tools used:*
+
+- `mcp__plugin_ecc_chrome-devtools__evaluate_script`
+
+### Claude
+
+Confirmed working while signed out: 31.2s, 708×1280, `readyState: 4`, no "unavailable" — the curl hit was boilerplate. That's what a grader will see.
+
+**Gate facts:** (1) Deletes `walkthrough.mp4` and `walkthrough.html` from disk and repo — both are files I created, not yours. Untracks `walkthrough.mov` from git via `--cached`, which **keeps your original recording on your Desktop**. Adds a `.gitignore` so the video isn't re-added. Modifies `SUBMISSION.md` §3. (2) Rollback: `git revert HEAD` restores the repo state; the `.mov` never leaves your disk, and the `.mp4` is regenerable from it in one ffmpeg command. (3) User's verbatim instruction: "maybe we just give the unlisted video link instead. roll back all the stuff you did with the walthrough video on github and istead just put this link: https://youtube.com/shorts/wB8YarpGf2o?feature=share"
+
+### Claude
+
+*Tools used:*
+
+- `Bash` - `cd /Users/vivekrai/Desktop/Weather
+rm -f walkthrough.mp4 walkthrough.html
+git rm -q --cached walkthrough.mov
+printf '# Screen recording lives on YouTube (unlist...`
+
+### Claude
+
+Your original `walkthrough.mov` is safe on disk. Now updating the submission.
+
+### Claude
+
+*Tools used:*
+
+- `Read` - `/Users/vivekrai/Desktop/Weather/SUBMISSION.md`
+
+### Claude
+
+**Gate facts:** (1) Nothing imports `SUBMISSION.md`; its only consumer is the pandoc→xelatex render producing `SUBMISSION.pdf`. (2) No functions or classes. (3) No data files read or written. (4) User's verbatim instruction: "roll back all the stuff you did with the walthrough video on github and istead just put this link: https://youtube.com/shorts/wB8YarpGf2o?feature=share"
+
+### Claude
+
+*Tools used:*
+
+- `Edit` - `/Users/vivekrai/Desktop/Weather/SUBMISSION.md`
+

@@ -45,11 +45,9 @@ tie into the act of me deciding when to go for a walk.
 
 ## 3. Video walkthrough
 
-**Watch (plays in browser): <https://odysseus707.github.io/should-i-go-out/walkthrough.html>**
+**<https://youtube.com/shorts/wB8YarpGf2o?feature=share>** (unlisted)
 
-Direct file: <https://github.com/Odysseus707/should-i-go-out/blob/main/walkthrough.mp4>
-
-A 32-second screen recording at phone width, showing the prototype answering each of the four
+A 31-second screen recording at phone width, showing the prototype answering each of the four
 needs in order: the current temperature, the umbrella verdict for the next six hours, the
 scored hourly strip for the best time to be outside, and the return-time chips changing the
 clothing recommendation.
