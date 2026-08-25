@@ -45,29 +45,27 @@ tie into the act of me deciding when to go for a walk.
 
 ## 3. Video walkthrough
 
-**[ PASTE VIDEO LINK OR ATTACH FILE HERE ]**
+**Watch (plays in browser): <https://odysseus707.github.io/should-i-go-out/walkthrough.html>**
 
-<!--
-  ~15 second screen recording, phone-width browser window.
-  Record on macOS with Cmd+Shift+5, or QuickTime > File > New Screen Recording.
-  If the file is too large to attach, upload it unlisted to Drive/YouTube and paste the link.
+Direct file: <https://github.com/Odysseus707/should-i-go-out/blob/main/walkthrough.mp4>
 
-  Shot list — one beat per need:
-    0:00-0:03  Page loads, glance at the current temperature (need 1)
-    0:03-0:07  Scroll to the umbrella card, read the verdict and the 6-hour bars (need 2)
-    0:07-0:11  Scroll to "Best time to be outside", scrub the hourly strip (need 3)
-    0:11-0:15  Tap between the 6 PM / 9 PM / 11 PM chips, watch the coldest
-               temperature and the layer recommendation change (need 4)
--->
+A 32-second screen recording at phone width, showing the prototype answering each of the four
+needs in order: the current temperature, the umbrella verdict for the next six hours, the
+scored hourly strip for the best time to be outside, and the return-time chips changing the
+clothing recommendation.
 
 ---
 
 ## 4. Generative AI transcript
 
-**[ PASTE TRANSCRIPT LINK OR ATTACH `TRANSCRIPT.md` / `TRANSCRIPT.pdf` HERE ]**
+**PDF: <https://github.com/Odysseus707/should-i-go-out/blob/main/TRANSCRIPT.pdf>**
 
-This prototype was built in a single Claude Code session. The full transcript covering that
-session accompanies this document, per the course Gen AI policy.
+Markdown: <https://github.com/Odysseus707/should-i-go-out/blob/main/TRANSCRIPT.md>
+
+This prototype was built with Claude Code (Claude Opus 5). The transcript covers the entire
+session — the design discussion, the build, and the revisions — per the course Gen AI policy.
+Raw tool output (file contents, API responses, browser snapshots) is omitted for length; each
+assistant message still lists the tools it invoked.
 
 ---
 
