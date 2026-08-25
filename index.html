@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Should I Go Out?</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23f5b301'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #191d27;
+    --card-2: #212633;
+    --text: #f2f4f8;
+    --muted: #949cb0;
+    --line: #2b3140;
+    --accent: #5b9cff;
+    --good: #4ade80;
+    --ok: #a3e635;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f2f4f8;
+      --card: #ffffff;
+      --card-2: #eef1f6;
+      --text: #12151c;
+      --muted: #5d6577;
+      --line: #dfe3ec;
+      --accent: #1f6feb;
+      --good: #16a34a;
+      --ok: #65a30d;
+      --warn: #b45309;
+      --bad: #dc2626;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .app { max-width: 480px; margin: 0 auto; padding: 0 16px calc(32px + env(safe-area-inset-bottom)); }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: calc(10px + env(safe-area-inset-top)) 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .loc-btn {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: 0; padding: 8px 4px;
+    color: var(--text); font: inherit; font-weight: 650;
+    text-align: left; cursor: pointer; min-height: 44px;
+  }
+  .loc-btn .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .loc-btn svg { flex: none; opacity: .65; }
+  .icon-btn {
+    flex: none; width: 46px; height: 46px;
+    display: grid; place-items: center;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; color: var(--text); cursor: pointer;
+  }
+  .icon-btn:active { background: var(--card-2); }
+  .unit-toggle {
+    flex: none; height: 46px; display: flex;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  }
+  .unit-toggle button {
+    width: 40px; background: none; border: 0; color: var(--muted);
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .unit-toggle button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .spin { animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px; margin-top: 14px;
+  }
+  .card-label {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+  }
+  .verdict { font-size: 27px; font-weight: 750; letter-spacing: -.02em; line-height: 1.15; }
+  .verdict.good { color: var(--good); }
+  .verdict.ok   { color: var(--ok); }
+  .verdict.warn { color: var(--warn); }
+  .verdict.bad  { color: var(--bad); }
+  .sub { color: var(--muted); font-size: 14.5px; margin-top: 6px; }
+
+  /* card 1 */
+  .now-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .temp { font-size: 68px; font-weight: 250; letter-spacing: -.04em; line-height: 1; }
+  .temp sup { font-size: 26px; font-weight: 400; vertical-align: top; top: .5em; position: relative; }
+  .cond { text-align: right; }
+  .cond .label { font-size: 15px; font-weight: 600; margin-top: 4px; }
+  .stats { display: flex; gap: 8px; margin-top: 18px; }
+  .stat {
+    flex: 1; background: var(--card-2); border-radius: 11px;
+    padding: 9px 6px; text-align: center;
+  }
+  .stat .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+  .stat .v { font-size: 16px; font-weight: 650; margin-top: 2px; }
+
+  /* strips */
+  .strip {
+    display: flex; gap: 6px; margin-top: 16px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; scrollbar-width: none;
+  }
+  .strip::-webkit-scrollbar { display: none; }
+  .bar-col { flex: none; width: 44px; text-align: center; }
+  .bar-track {
+    height: 74px; background: var(--card-2); border-radius: 7px;
+    display: flex; align-items: flex-end; overflow: hidden; position: relative;
+  }
+  .bar-fill { width: 100%; border-radius: 7px 7px 0 0; transition: height .25s ease; }
+  .bar-col .pct { font-size: 11.5px; font-weight: 700; margin-top: 5px; }
+  .bar-col .hr { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .bar-col.is-best .bar-track { outline: 2px solid var(--accent); outline-offset: 1.5px; }
+  .bar-col.is-best .hr { color: var(--accent); font-weight: 700; }
+  .bar-col.is-now .hr::after { content: " •"; color: var(--accent); }
+
+  .fill-good { background: var(--good); }
+  .fill-ok   { background: var(--ok); }
+  .fill-warn { background: var(--warn); }
+  .fill-bad  { background: var(--bad); }
+  .t-good { color: var(--good); } .t-ok { color: var(--ok); }
+  .t-warn { color: var(--warn); } .t-bad { color: var(--bad); }
+
+  /* factor pills */
+  .factors { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+  .pill {
+    background: var(--card-2); border-radius: 999px; padding: 5px 11px;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+  }
+  .pill b { color: var(--text); font-weight: 700; }
+
+  /* chips (card 4 control) */
+  .chips { display: flex; gap: 8px; margin: 14px 0 4px; }
+  .chip {
+    flex: 1; min-height: 44px; background: var(--card-2);
+    border: 1.5px solid transparent; border-radius: 12px;
+    color: var(--muted); font: inherit; font-size: 14.5px; font-weight: 650; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--text); background: color-mix(in srgb, var(--accent) 16%, var(--card-2)); }
+  .chip:active { transform: scale(.97); }
+
+  .swing { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+  .swing .end { text-align: center; flex: 1; }
+  .swing .end .v { font-size: 27px; font-weight: 650; letter-spacing: -.02em; }
+  .swing .end .k { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; margin-top: 2px; }
+  .swing .arrow { color: var(--muted); flex: none; }
+  .swing .delta {
+    flex: none; background: var(--card-2); border-radius: 999px;
+    padding: 5px 12px; font-size: 13.5px; font-weight: 700;
+  }
+
+  /* ---------- states ---------- */
+  .skel { background: var(--card-2); border-radius: 8px; animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+  .state { text-align: center; padding: 34px 18px; }
+  .state h2 { font-size: 19px; margin: 12px 0 6px; }
+  .state p { color: var(--muted); font-size: 14.5px; margin: 0 0 18px; }
+  .btn {
+    min-height: 46px; padding: 0 22px; background: var(--accent); color: #fff;
+    border: 0; border-radius: 12px; font: inherit; font-weight: 650; cursor: pointer;
+  }
+
+  footer {
+    margin-top: 22px; text-align: center;
+    font-size: 12.5px; color: var(--muted); line-height: 1.7;
+  }
+  footer a { color: var(--muted); }
+
+  /* ---------- search sheet ---------- */
+  .sheet-bg {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(2px);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 0 16px;
+  }
+  .sheet-bg[hidden] { display: none; }
+  .sheet {
+    width: 100%; max-width: 480px; margin-top: 8vh;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.4);
+  }
+  .sheet-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .sheet-head h2 { font-size: 17px; margin: 0; flex: 1; }
+  .search-input {
+    width: 100%; min-height: 46px; padding: 0 14px;
+    background: var(--card-2); border: 1.5px solid var(--line); border-radius: 12px;
+    color: var(--text); font: inherit;
+  }
+  .search-input:focus { outline: 0; border-color: var(--accent); }
+  .results { list-style: none; margin: 12px 0 0; padding: 0; max-height: 46vh; overflow-y: auto; }
+  .results li + li { border-top: 1px solid var(--line); }
+  .results button {
+    width: 100%; min-height: 52px; padding: 10px 4px; text-align: left;
+    background: none; border: 0; color: var(--text); font: inherit; cursor: pointer;
+  }
+  .results .r-name { font-weight: 650; }
+  .results .r-sub { font-size: 13px; color: var(--muted); }
+  .geo-btn {
+    width: 100%; min-height: 46px; margin-top: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--card-2); border: 0; border-radius: 12px;
+    color: var(--accent); font: inherit; font-weight: 650; cursor: pointer;
+  }
+  .hint { font-size: 13px; color: var(--muted); margin: 10px 2px 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <button class="loc-btn" id="locBtn" aria-label="Change location">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span class="name" id="locName">Locating…</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+
+    <div class="unit-toggle" role="group" aria-label="Temperature units">
+      <button id="unitF" aria-pressed="true">°F</button>
+      <button id="unitC" aria-pressed="false">°C</button>
+    </div>
+
+    <button class="icon-btn" id="refreshBtn" aria-label="Refresh weather">
+      <svg id="refreshIcon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+    </button>
+  </header>
+
+  <main id="main" aria-live="polite"></main>
+
+  <footer>
+    <div id="updated"></div>
+    <div>Live data from <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></div>
+  </footer>
+</div>
+
+<!-- location search sheet -->
+<div class="sheet-bg" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head">
+      <h2 id="sheetTitle">Choose a location</h2>
+      <button class="icon-btn" id="sheetClose" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <input class="search-input" id="searchInput" type="search" placeholder="Search a city…" autocomplete="off" enterkeyhint="search">
+    <button class="geo-btn" id="geoBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+      Use my current location
+    </button>
+    <ul class="results" id="results"></ul>
+    <p class="hint" id="searchHint"></p>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   State
+   ============================================================ */
+const LS_LOC = "weather.lastLocation";
+const LS_UNIT = "weather.units";
+
+const state = {
+  loc: null,         // { label, lat, lon }
+  data: null,        // raw Open-Meteo forecast response
+  units: "F",        // "F" | "C"  (API is always fetched in °F; we convert for display)
+  returnHour: 21,    // card 4 chip: 18 | 21 | 23
+  fetchedAt: null,
+  loading: false,
+};
+
+/* ============================================================
+   Small helpers
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+
+const toC = (f) => (f - 32) * 5 / 9;
+const temp = (f) => Math.round(state.units === "C" ? toC(f) : f);
+const degSuffix = () => (state.units === "C" ? "°C" : "°F");
+
+// Times from the API are already in the *location's* local timezone and are
+// fixed-width ("2026-08-24T18:00"), so we slice strings instead of using Date —
+// that keeps everything correct even when the location is in another timezone.
+const hourOf = (iso) => +iso.slice(11, 13);
+
+function hourLabel(iso, compact) {
+  const h = hourOf(iso);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return compact ? h12 + ampm[0].toLowerCase() : h12 + " " + ampm;
+}
+
+function rangeLabel(iso) {
+  const h = hourOf(iso), h2 = (h + 1) % 24;
+  const f = (x) => (x % 12 === 0 ? 12 : x % 12);
+  const a = h >= 12 ? "PM" : "AM", b = h2 >= 12 ? "PM" : "AM";
+  return a === b ? `${f(h)}–${f(h2)} ${b}` : `${f(h)} ${a}–${f(h2)} ${b}`;
+}
+
+/* WMO weather codes → label + icon key */
+const WMO = {
+  0:["Clear","sun"], 1:["Mostly clear","sun"], 2:["Partly cloudy","cloudsun"], 3:["Overcast","cloud"],
+  45:["Fog","fog"], 48:["Freezing fog","fog"],
+  51:["Light drizzle","rain"], 53:["Drizzle","rain"], 55:["Heavy drizzle","rain"],
+  56:["Freezing drizzle","rain"], 57:["Freezing drizzle","rain"],
+  61:["Light rain","rain"], 63:["Rain","rain"], 65:["Heavy rain","rain"],
+  66:["Freezing rain","rain"], 67:["Freezing rain","rain"],
+  71:["Light snow","snow"], 73:["Snow","snow"], 75:["Heavy snow","snow"], 77:["Snow grains","snow"],
+  80:["Light showers","rain"], 81:["Showers","rain"], 82:["Heavy showers","rain"],
+  85:["Snow showers","snow"], 86:["Snow showers","snow"],
+  95:["Thunderstorm","storm"], 96:["Thunderstorm + hail","storm"], 99:["Thunderstorm + hail","storm"],
+};
+const describe = (code) => (WMO[code] || ["Unknown", "cloud"])[0];
+const iconKey  = (code) => (WMO[code] || ["Unknown", "cloud"])[1];
+
+function icon(key, size, isDay) {
+  const s = `width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
+  if (key === "sun" && isDay === false) {
+    return `<svg ${s}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>`;
+  }
+  switch (key) {
+    case "sun": return `<svg ${s}><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>`;
+    case "cloudsun": return `<svg ${s}><circle cx="8" cy="8" r="3"/><path d="M8 2v1.5M2 8h1.5M3.8 3.8l1 1M12.2 3.8l-1 1"/><path d="M17.5 20H8a4 4 0 0 1 0-8 5.2 5.2 0 0 1 9.7 1.3A3.4 3.4 0 0 1 17.5 20Z"/></svg>`;
+    case "cloud": return `<svg ${s}><path d="M17.5 19H7a4.5 4.5 0 0 1 0-9 6 6 0 0 1 11.2 1.5A3.8 3.8 0 0 1 17.5 19Z"/></svg>`;
+    case "rain": return `<svg ${s}><path d="M17.5 15H7a4.5 4.5 0 0 1 0-9 6 6 0 0 1 11.2 1.5A3.8 3.8 0 0 1 17.5 15Z"/><path d="M8 18.5v2M12 18.5v3M16 18.5v2"/></svg>`;
+    case "snow": return `<svg ${s}><path d="M17.5 14H7a4.5 4.5 0 0 1 0-9 6 6 0 0 1 11.2 1.5A3.8 3.8 0 0 1 17.5 14Z"/><path d="M8 18h.01M12 20h.01M16 18h.01M10 21h.01M14 17h.01"/></svg>`;
+    case "storm": return `<svg ${s}><path d="M17.5 14H7a4.5 4.5 0 0 1 0-9 6 6 0 0 1 11.2 1.5A3.8 3.8 0 0 1 17.5 14Z"/><path d="m12 16-2 4h4l-2 4"/></svg>`;
+    case "fog": return `<svg ${s}><path d="M17.5 13H7a4.5 4.5 0 0 1 0-9 6 6 0 0 1 11.2 1.5A3.8 3.8 0 0 1 17.5 13Z"/><path d="M5 17h14M7 21h10"/></svg>`;
+    case "umbrella": return `<svg ${s}><path d="M12 2a10 10 0 0 1 10 10H2A10 10 0 0 1 12 2Z"/><path d="M12 12v7a2.5 2.5 0 0 0 5 0"/></svg>`;
+    case "walk": return `<svg ${s}><circle cx="13" cy="4" r="2"/><path d="m9 21 2-6-2.5-2.5L8 8l4-1 3 3 3 1"/><path d="m11 15-2.5 6M15 11l1.5 4"/></svg>`;
+    case "shirt": return `<svg ${s}><path d="M8 2 4 4.5 5.5 9 8 8v13h8V8l2.5 1L20 4.5 16 2a3 3 0 0 1-8 0Z"/></svg>`;
+    case "thermo": return `<svg ${s}><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4.5 4.5 0 1 0 4 0Z"/></svg>`;
+  }
+  return "";
+}
+
+/* Tier a 0–100 score (higher = better) into a colour class + word. */
+function tier(score) {
+  if (score >= 75) return { cls: "good", word: "Great" };
+  if (score >= 55) return { cls: "ok",   word: "Good" };
+  if (score >= 35) return { cls: "warn", word: "So-so" };
+  return { cls: "bad", word: "Poor" };
+}
+
+/* Tier a rain probability (higher = worse). */
+function rainTier(pop) {
+  if (pop >= 50) return "bad";
+  if (pop >= 25) return "warn";
+  if (pop >= 10) return "ok";
+  return "good";
+}
+
+/* ============================================================
+   Data
+   ============================================================ */
+const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+const GEOCODE_URL  = "https://geocoding-api.open-meteo.com/v1/search";
+const REVERSE_URL  = "https://api.bigdatacloud.net/data/reverse-geocode-client";
+
+async function fetchWeather(lat, lon) {
+  const p = new URLSearchParams({
+    latitude: lat,
+    longitude: lon,
+    current: "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,uv_index,is_day",
+    hourly: "temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,uv_index",
+    daily: "temperature_2m_max,temperature_2m_min,sunrise,sunset",
+    forecast_days: "2",
+    temperature_unit: "fahrenheit",
+    wind_speed_unit: "mph",
+    precipitation_unit: "inch",
+    timezone: "auto",
+  });
+  const res = await fetch(`${FORECAST_URL}?${p}`);
+  if (!res.ok) throw new Error("Weather service returned " + res.status);
+  return res.json();
+}
+
+async function searchPlaces(q) {
+  const p = new URLSearchParams({ name: q, count: "6", language: "en", format: "json" });
+  const res = await fetch(`${GEOCODE_URL}?${p}`);
+  if (!res.ok) throw new Error("Search failed");
+  const j = await res.json();
+  return j.results || [];
+}
+
+/* Turn coordinates into a human place name. Falls back to the raw
+   coordinates if the reverse-geocode service is unreachable — a missing
+   label must never block the forecast from rendering. */
+async function labelFor(lat, lon) {
+  try {
+    const p = new URLSearchParams({ latitude: lat, longitude: lon, localityLanguage: "en" });
+    const res = await fetch(`${REVERSE_URL}?${p}`);
+    if (!res.ok) throw new Error("reverse geocode failed");
+    const j = await res.json();
+    const city = j.city || j.locality || j.principalSubdivision;
+    if (city) {
+      return j.principalSubdivision && city !== j.principalSubdivision
+        ? `${city}, ${j.principalSubdivision}` : city;
+    }
+  } catch (e) { /* fall through to coordinates */ }
+  return `${(+lat).toFixed(2)}, ${(+lon).toFixed(2)}`;
+}
+
+/* ============================================================
+   Derived readings — one function per user need
+   ============================================================ */
+
+/* Index into hourly[] for the hour we're currently in, per the API's own
+   clock (not the browser's). */
+function nowIndex(d) {
+  const key = d.current.time.slice(0, 13) + ":00";
+  const i = d.hourly.time.indexOf(key);
+  return i === -1 ? 0 : i;
+}
+
+const isDaylight = (t, d, day) => t >= d.daily.sunrise[day] && t <= d.daily.sunset[day];
+
+/* NEED 2 — umbrella check over the next 6 hours */
+function umbrella(d) {
+  const i0 = nowIndex(d), H = d.hourly;
+  const hours = [];
+  for (let i = i0; i < Math.min(i0 + 6, H.time.length); i++) {
+    hours.push({ t: H.time[i], pop: H.precipitation_probability[i] ?? 0, amt: H.precipitation[i] ?? 0 });
+  }
+  const peak = hours.reduce((m, h) => Math.max(m, h.pop), 0);
+  const firstWet = hours.find((h) => h.pop >= 50) || hours.find((h) => h.pop >= 25);
+
+  let verdict, cls, sub;
+  if (peak >= 50) {
+    verdict = "Yes — take it";
+    cls = "bad";
+    sub = `Rain likely around ${hourLabel(firstWet.t)} · ${peak}% chance at peak`;
+  } else if (peak >= 25) {
+    verdict = "Maybe — grab a hood";
+    cls = "warn";
+    sub = `A ${peak}% chance around ${hourLabel(firstWet.t)}. Not a downpour, but possible.`;
+  } else {
+    verdict = "No — you're clear";
+    cls = "good";
+    sub = peak > 0
+      ? `Only a ${peak}% chance at any point in the next 6 hours.`
+      : "No rain in the forecast for the next 6 hours.";
+  }
+  return { verdict, cls, sub, hours };
+}
+
+/* NEED 3 — score each daylight hour for being outside.
+   Rain is weighted heaviest: it's the one factor that cancels the plan
+   outright, where heat or sun just make it less pleasant. */
+function comfortScore(feels, uv, pop) {
+  let s = 100;
+  if (feels < 60) s -= (60 - feels) * 2.2;
+  else if (feels > 75) s -= (feels - 75) * 2.6;
+  if (uv > 5) s -= (uv - 5) * 6;
+  if (uv > 8) s -= (uv - 8) * 6;   // extra penalty once UV is genuinely unsafe
+  s -= pop * 0.9;
+  return Math.max(0, Math.min(100, Math.round(s)));
+}
+
+function bestHour(d) {
+  const i0 = nowIndex(d), H = d.hourly;
+  const build = (day) => {
+    const out = [];
+    for (let i = i0; i < H.time.length; i++) {
+      const t = H.time[i];
+      if (t.slice(0, 10) !== d.daily.time[day]) continue;
+      if (!isDaylight(t, d, day)) continue;
+      out.push({
+        i, t,
+        feels: H.apparent_temperature[i],
+        uv: H.uv_index[i] ?? 0,
+        pop: H.precipitation_probability[i] ?? 0,
+        score: comfortScore(H.apparent_temperature[i], H.uv_index[i] ?? 0, H.precipitation_probability[i] ?? 0),
+      });
+    }
+    return out;
+  };
+
+  let hours = build(0);
+  let tomorrow = false;
+  if (hours.length < 2) {           // daylight is over — score tomorrow instead
+    hours = build(1);
+    tomorrow = true;
+  }
+  if (!hours.length) return null;
+
+  const best = hours.reduce((a, b) => (b.score > a.score ? b : a));
+  const nowH = tomorrow ? null : hours.find((h) => h.i === i0);
+  const goNow = !!nowH && nowH.score >= best.score - 8 && nowH.score >= 55;
+
+  return { hours, best, goNow, tomorrow, nowIdx: i0 };
+}
+
+/* NEED 4 — how the temperature falls between now and when you head home.
+   Keyed off the *minimum* feels-like in that window: you get cold at the
+   coldest moment, not the average one. */
+function dressForDay(d, returnHour) {
+  const i0 = nowIndex(d), H = d.hourly;
+
+  // First occurrence of the chosen hour that is still ahead of us. With
+  // forecast_days=2 this also resolves "6 PM" to tomorrow when it's 11 PM now.
+  let end = -1;
+  for (let i = i0 + 1; i < H.time.length; i++) {
+    if (hourOf(H.time[i]) === returnHour) { end = i; break; }
+  }
+  if (end === -1) end = H.time.length - 1;
+
+  let min = Infinity, max = -Infinity, minAt = H.time[i0];
+  for (let i = i0; i <= end; i++) {
+    const f = H.apparent_temperature[i];
+    if (f < min) { min = f; minAt = H.time[i]; }
+    if (f > max) max = f;
+  }
+
+  const nowFeels = d.current.apparent_temperature;
+  const layers =
+    min >= 75 ? ["T-shirt weather", "good"] :
+    min >= 65 ? ["T-shirt, maybe a light layer", "good"] :
+    min >= 55 ? ["Long sleeves or a light layer", "ok"] :
+    min >= 45 ? ["Bring a jacket", "warn"] :
+    min >= 35 ? ["Warm jacket", "warn"] :
+                ["Coat, hat, gloves", "bad"];
+
+  const crossesMidnight = H.time[end].slice(0, 10) !== H.time[i0].slice(0, 10);
+  return {
+    verdict: layers[0], cls: layers[1],
+    nowFeels, min, max, minAt, end,
+    drop: Math.round(nowFeels - min),
+    crossesMidnight,
+  };
+}
+
+/* ============================================================
+   Render
+   ============================================================ */
+function render() {
+  const d = state.data;
+  if (!d) return;
+
+  const c = d.current;
+  const u = umbrella(d);
+  const b = bestHour(d);
+  const dress = dressForDay(d, state.returnHour);
+
+  const parts = [];
+
+  /* ---- NEED 1 — current temperature ---- */
+  parts.push(`
+    <section class="card">
+      <div class="card-label">${icon("thermo", 13)} Right now</div>
+      <div class="now-row">
+        <div class="temp">${temp(c.temperature_2m)}<sup>${degSuffix()}</sup></div>
+        <div class="cond">
+          ${icon(iconKey(c.weather_code), 40, c.is_day === 1)}
+          <div class="label">${describe(c.weather_code)}</div>
+        </div>
+      </div>
+      <div class="sub">Feels like ${temp(c.apparent_temperature)}°</div>
+      <div class="stats">
+        <div class="stat"><div class="k">Humidity</div><div class="v">${Math.round(c.relative_humidity_2m)}%</div></div>
+        <div class="stat"><div class="k">Wind</div><div class="v">${state.units === "C" ? Math.round(c.wind_speed_10m * 1.609) + " km/h" : Math.round(c.wind_speed_10m) + " mph"}</div></div>
+        <div class="stat"><div class="k">UV index</div><div class="v">${Math.round(c.uv_index)}</div></div>
+      </div>
+    </section>`);
+
+  /* ---- NEED 2 — umbrella ---- */
+  parts.push(`
+    <section class="card">
+      <div class="card-label">${icon("umbrella", 13)} Umbrella · next 6 hours</div>
+      <div class="verdict ${u.cls}">${u.verdict}</div>
+      <div class="sub">${u.sub}</div>
+      <div class="strip">
+        ${u.hours.map((h, k) => {
+          const t = rainTier(h.pop);
+          return `<div class="bar-col ${k === 0 ? "is-now" : ""}">
+            <div class="bar-track"><div class="bar-fill fill-${t}" style="height:${Math.max(3, h.pop)}%"></div></div>
+            <div class="pct t-${t}">${h.pop}%</div>
+            <div class="hr">${k === 0 ? "Now" : hourLabel(h.t, true)}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </section>`);
+
+  /* ---- NEED 3 — best hour to be outside ---- */
+  if (b) {
+    const bt = tier(b.best.score);
+    const headline = b.goNow ? "Go now" : `Best: ${rangeLabel(b.best.t)}`;
+    const when = b.tomorrow ? "tomorrow" : "today";
+    const sub = b.goNow
+      ? `Right now is about as good as it gets ${when} — best window is ${rangeLabel(b.best.t)}.`
+      : `${bt.word} conditions ${when}. ${b.tomorrow ? "Daylight's done for today." : "Better than any hour between now and then."}`;
+
+    parts.push(`
+      <section class="card">
+        <div class="card-label">${icon("walk", 13)} Best time to be outside</div>
+        <div class="verdict ${bt.cls}">${headline}</div>
+        <div class="sub">${sub}</div>
+        <div class="factors">
+          <span class="pill">Feels like <b>${temp(b.best.feels)}°</b></span>
+          <span class="pill">UV <b>${Math.round(b.best.uv)}</b></span>
+          <span class="pill">Rain <b>${b.best.pop}%</b></span>
+        </div>
+        <div class="strip">
+          ${b.hours.map((h) => {
+            const t = tier(h.score);
+            const isNow = !b.tomorrow && h.i === b.nowIdx;
+            return `<div class="bar-col ${h.i === b.best.i ? "is-best" : ""} ${isNow ? "is-now" : ""}">
+              <div class="bar-track"><div class="bar-fill fill-${t.cls}" style="height:${Math.max(4, h.score)}%"></div></div>
+              <div class="pct t-${t.cls}">${h.score}</div>
+              <div class="hr">${isNow ? "Now" : hourLabel(h.t, true)}</div>
+            </div>`;
+          }).join("")}
+        </div>
+        <p class="hint">Scored on feels-like temperature, UV index and rain chance. Daylight hours only.</p>
+      </section>`);
+  }
+
+  /* ---- NEED 4 — dress for the whole day ---- */
+  const chip = (h, lbl) =>
+    `<button class="chip" data-hour="${h}" aria-pressed="${state.returnHour === h}">${lbl}</button>`;
+
+  parts.push(`
+    <section class="card">
+      <div class="card-label">${icon("shirt", 13)} Dressing for the day</div>
+      <div class="sub" style="margin:0 0 2px">If I'm out until…</div>
+      <div class="chips" role="group" aria-label="When are you heading home?">
+        ${chip(18, "6 PM")}${chip(21, "9 PM")}${chip(23, "11 PM")}
+      </div>
+      <div class="verdict ${dress.cls}" style="margin-top:14px">${dress.verdict}</div>
+      <div class="sub">
+        Coldest it'll feel is ${temp(dress.min)}° around ${hourLabel(dress.minAt)}${dress.crossesMidnight ? " tomorrow" : ""}.
+      </div>
+      <div class="swing">
+        <div class="end">
+          <div class="v">${temp(dress.nowFeels)}°</div>
+          <div class="k">Feels now</div>
+        </div>
+        <svg class="arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <div class="end">
+          <div class="v">${temp(dress.min)}°</div>
+          <div class="k">Coldest</div>
+        </div>
+        <div class="delta ${dress.drop > 0 ? "t-warn" : "t-good"}">
+          ${dress.drop > 0 ? "↓ " + Math.abs(temp(dress.nowFeels) - temp(dress.min)) + "°" : "steady"}
+        </div>
+      </div>
+    </section>`);
+
+  $("main").innerHTML = parts.join("");
+
+  // Card 4's chips are the one control that recomputes a card in place.
+  document.querySelectorAll(".chip").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.returnHour = +el.dataset.hour;
+      render();
+    });
+  });
+
+  updateStamp();
+}
+
+/* ---------- non-card states ---------- */
+function renderSkeleton() {
+  $("main").innerHTML = `
+    <section class="card">
+      <div class="skel" style="height:14px;width:90px"></div>
+      <div class="skel" style="height:62px;width:150px;margin-top:16px"></div>
+      <div class="skel" style="height:46px;margin-top:18px"></div>
+    </section>
+    <section class="card">
+      <div class="skel" style="height:14px;width:150px"></div>
+      <div class="skel" style="height:28px;width:200px;margin-top:14px"></div>
+      <div class="skel" style="height:74px;margin-top:16px"></div>
+    </section>
+    <section class="card">
+      <div class="skel" style="height:14px;width:170px"></div>
+      <div class="skel" style="height:28px;width:170px;margin-top:14px"></div>
+      <div class="skel" style="height:74px;margin-top:16px"></div>
+    </section>`;
+}
+
+function renderError(msg, showSearch) {
+  $("main").innerHTML = `
+    <section class="card state">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="color:var(--muted)"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>
+      <h2>${showSearch ? "Where are you?" : "Couldn't load the weather"}</h2>
+      <p>${msg}</p>
+      <button class="btn" id="stateBtn">${showSearch ? "Search a city" : "Try again"}</button>
+    </section>`;
+  $("stateBtn").addEventListener("click", showSearch ? openSheet : () => load(state.loc));
+  $("updated").textContent = "";
+}
+
+function updateStamp() {
+  if (!state.fetchedAt) { $("updated").textContent = ""; return; }
+  const secs = Math.round((Date.now() - state.fetchedAt) / 1000);
+  $("updated").textContent =
+    secs < 60 ? "Updated just now"
+    : secs < 3600 ? `Updated ${Math.floor(secs / 60)}m ago`
+    : `Updated ${Math.floor(secs / 3600)}h ago`;
+}
+
+/* ============================================================
+   Load / location flow
+   ============================================================ */
+async function load(loc) {
+  if (!loc) return;
+  state.loc = loc;
+  state.loading = true;
+  $("locName").textContent = loc.label;
+  $("refreshIcon").classList.add("spin");
+  if (!state.data) renderSkeleton();
+
+  try {
+    state.data = await fetchWeather(loc.lat, loc.lon);
+    state.fetchedAt = Date.now();
+    localStorage.setItem(LS_LOC, JSON.stringify(loc));
+    render();
+  } catch (err) {
+    console.error(err);
+    if (!state.data) renderError("Check your connection and try again.", false);
+  } finally {
+    state.loading = false;
+    $("refreshIcon").classList.remove("spin");
+  }
+}
+
+function useGeolocation(opts) {
+  const silent = !!(opts && opts.silent);
+  if (!navigator.geolocation) {
+    if (!silent) renderError("This browser can't share your location. Search for a city instead.", true);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      closeSheet();
+      const label = await labelFor(lat, lon);
+      load({ label: label, lat: lat, lon: lon });
+    },
+    () => {
+      // Denied, timed out, or a non-secure origin. Never dead-end here:
+      // route straight into the search flow.
+      if (silent && state.loc) return;   // we already have a saved location
+      if (state.data) return;
+      renderError("Location access is off, so pick a city by hand.", true);
+      openSheet();
+    },
+    { timeout: 9000, maximumAge: 600000 }
+  );
+}
+
+/* ---------- search sheet ---------- */
+function openSheet() {
+  $("sheet").hidden = false;
+  $("searchInput").focus();
+}
+function closeSheet() {
+  $("sheet").hidden = true;
+  $("searchInput").value = "";
+  $("results").innerHTML = "";
+  $("searchHint").textContent = "";
+}
+
+let searchTimer;
+$("searchInput").addEventListener("input", (e) => {
+  const q = e.target.value.trim();
+  clearTimeout(searchTimer);
+  if (q.length < 2) { $("results").innerHTML = ""; $("searchHint").textContent = ""; return; }
+  searchTimer = setTimeout(async () => {
+    $("searchHint").textContent = "Searching…";
+    try {
+      const places = await searchPlaces(q);
+      $("searchHint").textContent = places.length ? "" : "No matches. Try a different spelling.";
+      $("results").innerHTML = places.map((p, i) => `
+        <li><button data-i="${i}">
+          <div class="r-name">${p.name}</div>
+          <div class="r-sub">${[p.admin1, p.country].filter(Boolean).join(", ")}</div>
+        </button></li>`).join("");
+      $("results").querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const p = places[+btn.dataset.i];
+          closeSheet();
+          load({ label: [p.name, p.admin1].filter(Boolean).join(", "), lat: p.latitude, lon: p.longitude });
+        });
+      });
+    } catch (err) {
+      $("searchHint").textContent = "Search is unavailable right now.";
+    }
+  }, 280);
+});
+
+/* ---------- wiring ---------- */
+$("locBtn").addEventListener("click", openSheet);
+$("sheetClose").addEventListener("click", closeSheet);
+$("geoBtn").addEventListener("click", () => useGeolocation());
+$("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeSheet(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
+
+$("refreshBtn").addEventListener("click", () => { if (!state.loading) load(state.loc); });
+
+function setUnits(u) {
+  state.units = u;
+  localStorage.setItem(LS_UNIT, u);
+  $("unitF").setAttribute("aria-pressed", String(u === "F"));
+  $("unitC").setAttribute("aria-pressed", String(u === "C"));
+  if (state.data) render();   // no refetch — we convert what we already have
+}
+$("unitF").addEventListener("click", () => setUnits("F"));
+$("unitC").addEventListener("click", () => setUnits("C"));
+
+setInterval(updateStamp, 30000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && state.fetchedAt && Date.now() - state.fetchedAt > 600000) load(state.loc);
+});
+
+/* ---------- boot ---------- */
+(function init() {
+  const savedUnit = localStorage.getItem(LS_UNIT);
+  if (savedUnit === "C" || savedUnit === "F") setUnits(savedUnit);
+
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(LS_LOC) || "null"); } catch (e) {}
+
+  if (saved && typeof saved.lat === "number") {
+    load(saved);                       // paint immediately from last known place
+    useGeolocation({ silent: true });  // then quietly correct it if allowed
+  } else {
+    renderSkeleton();
+    useGeolocation();
+  }
+})();
+</script>
+</body>
+</html>
